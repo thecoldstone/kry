@@ -12,6 +12,8 @@
 #include <gmpxx.h>
 #include "logger.hpp"
 
+#define SSACCURACY 100
+
 enum RSAOPERATION {
     GENERATE,
     ENCRYPT,
@@ -19,16 +21,18 @@ enum RSAOPERATION {
     CRACK
 };
 
-class RSA {
+class RSA: public Logger {
     public:
         RSA();
         int parse(int argc, char **argv);
-        int run();
+        void run();
     protected:
-        int rsa();
-        mpz_class generatePrime();
+        void rsa();
+        void encrypt();
+        void decipher();
+        void crack();
     private:
-        Logger logger;
+
         RSAOPERATION op;
         int B;
         mpz_class P;
@@ -36,6 +40,21 @@ class RSA {
         mpz_class N;
         mpz_class E;
         mpz_class D;
+        mpz_class M;
+        mpz_class C;
+
+        mpz_class Phi;
+
+        void printOutput();
+        bool solovoyStrassen(const mpz_class number, int k);
+        void checkPrime(mpz_class &number);
+        int jacobi(const mpz_class a, const mpz_class n);
+
+        mpz_class mod(mpz_class base, mpz_class exp, mpz_class mod);
+        mpz_class modInv(mpz_class a, mpz_class b);
+        mpz_class gcd(mpz_class a, mpz_class b);
+        mpz_class getPow(mpz_class a, mpz_class k);
+        mpz_class generatePrime();
 };
 
 #endif

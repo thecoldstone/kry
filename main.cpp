@@ -9,10 +9,10 @@ int main(int argc, char **argv) {
     RSA rsa = RSA();
     
     // Parse arguments 
-    rc = rsa.parse(argc, argv);
-
-    // Run RSA based on passed arguments
-    rc = rsa.run();
+    if((rc = rsa.parse(argc, argv)) == 0) {
+        // Run RSA based on passed arguments
+        rsa.run();
+    };
 
     return rc;
 }

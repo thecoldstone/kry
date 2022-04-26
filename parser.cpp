@@ -16,6 +16,9 @@ void help()
 {
     cout << "Example: ./kry [-g B, -e E N M, -d D N C, -b N]" << endl;
     cout << "\tB - request key length (public modulus) in bites" << endl;
+    cout << "\t\t -b N (int)" << endl;
+    cout << "\tE - encrypts message" << endl;
+    cout << "\t\t -e E (hex) N (hex) M (hex)" << endl;
 }
 
 bool isHex(string str)
@@ -58,8 +61,7 @@ int RSA::parse(int argc, char **argv)
     int rc = EXIT_SUCCESS;
     string str;
     int opt, index;
-    char *next;
-    static const char *sOptions = "g:e:d:b:";
+    static const char *sOptions = "g:e:d:b:l";
 
     if (argc <= 1)
     {
@@ -67,42 +69,64 @@ int RSA::parse(int argc, char **argv)
     }
     else
     {
-        logger.log("Parsing arguments");
-
         while ((opt = getopt(argc, argv, sOptions)) != EOF)
         {
             switch (opt)
             {
             case 0:
                 break;
-            // Generates RSA public and private keys
-            case 'g': 
-                rc = !isNumber(optarg);
-                this->B = stoi(optarg);
-                this->op = GENERATE;
+            case 'g': // Generates RSA public and private keys
+                if((rc = !isNumber(optarg))) {
+                    break;
+                };
+                B = stoi(optarg);
+                op = GENERATE;
                 break;
             case 'e': // Encrypts
-                index = optind - 1;
-                while (index < argc)
-                {
-                    next = strdup(argv[index]);
-                    index++;
-                    if (next[0] != '-')
-                    {
-                        cout << next;
-                    }
-                    else
-                        break;
+            case 'd': // Decrypts
+                if (argc < 5) {
+                    rc = EXIT_FAILURE;
+                    break;
                 }
-                this->op=ENCRYPT;
+                rc = !isHex(argv[2]);
+                rc = !isHex(argv[3]);
+                rc = !isHex(argv[4]);
+
+                if(rc) {
+                    break;
+                }
+
+                switch (opt)
+                {
+                case 'e':
+                    E = mpz_class(argv[2]);
+                    N = mpz_class(argv[3]);
+                    M = mpz_class(argv[4]);
+                    op=ENCRYPT;
+                    break;
+                case 'd':
+                    D = mpz_class(argv[2]);
+                    N = mpz_class(argv[3]);
+                    C = mpz_class(argv[4]);
+                    op=DECRYPT;
+                    break;
+                default:
+                    break;
+                }
+
+                if (argc <= 5) break;
+
+                if(strcmp(argv[5], "-l") == 0) {
+                    LOGGING = true;
+                }
+
                 break;
-            case 'd':
-                cout << optarg;
-                this->op=DECRYPT;
-                break;
-            case 'b':
+            case 'b': // Cracks
                 rc = !isHex(optarg);
-                this->op=CRACK;
+                op=CRACK;
+                break;
+            case 'l': // Makes logging active
+                LOGGING = true;
                 break;
             default:
                 help();
@@ -111,7 +135,7 @@ int RSA::parse(int argc, char **argv)
         }
     }
 
-    if (rc == 1)
+    if (rc == EXIT_FAILURE)
     {
         help();
     }

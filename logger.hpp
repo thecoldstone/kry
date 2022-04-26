@@ -12,8 +12,11 @@ using namespace std;
 
 class Logger {
     public:
+        bool LOGGING;
+
         Logger();
-        void log(string logText);
+        void log(string logText, bool newl);
+        void logVariable(string varName, string value);
 };
 
 #endif

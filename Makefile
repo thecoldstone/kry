@@ -5,7 +5,7 @@ XLOGINXX=xzhuko01
 SRC=**.cpp
 BIN=kry
 
-CXXFLAGS:=-Wall -Wextra -Wsuggest-override -Wnull-dereference -Wshadow -Wold-style-cast -pedantic -lgmp -std=c++20
+CXXFLAGS:=-Wall -Wextra -Wsuggest-override -Wnull-dereference -Wshadow -Wold-style-cast -pedantic -lgmp -lgmpxx -std=c++20
 
 # all: 
 # 	$(CXX) $(SRC) -o $(BIN)
