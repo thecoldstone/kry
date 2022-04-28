@@ -9,7 +9,7 @@ using namespace std;
 
 /**
  * @brief Help function
- * 
+ *
  * @todo Fix printed help text
  */
 void help()
@@ -21,6 +21,13 @@ void help()
     cout << "\t\t -e E (hex) N (hex) M (hex)" << endl;
 }
 
+/**
+ * @brief Checks if string represents a hex value
+ * 
+ * @param str 
+ * @return true 
+ * @return false 
+ */
 bool isHex(string str)
 {
 
@@ -38,6 +45,13 @@ bool isHex(string str)
     return true;
 }
 
+/**
+ * @brief Checks if string represents a number
+ * 
+ * @param str 
+ * @return true 
+ * @return false 
+ */
 bool isNumber(string str)
 {
     for (char &c : str)
@@ -51,16 +65,16 @@ bool isNumber(string str)
 
 /**
  * @brief Parses passed arguments
- * 
- * @param argc 
- * @param argv 
- * @return rc - int 
+ *
+ * @param argc
+ * @param argv
+ * @return rc - int
  */
 int RSA::parse(int argc, char **argv)
 {
     int rc = EXIT_SUCCESS;
     string str;
-    int opt, index;
+    int opt;
     static const char *sOptions = "g:e:d:b:l";
 
     if (argc <= 1)
@@ -76,7 +90,8 @@ int RSA::parse(int argc, char **argv)
             case 0:
                 break;
             case 'g': // Generates RSA public and private keys
-                if((rc = !isNumber(optarg))) {
+                if ((rc = !isNumber(optarg)))
+                {
                     break;
                 };
                 B = stoi(optarg);
@@ -84,7 +99,8 @@ int RSA::parse(int argc, char **argv)
                 break;
             case 'e': // Encrypts
             case 'd': // Decrypts
-                if (argc < 5) {
+                if (argc < 5)
+                {
                     rc = EXIT_FAILURE;
                     break;
                 }
@@ -92,7 +108,8 @@ int RSA::parse(int argc, char **argv)
                 rc = !isHex(argv[3]);
                 rc = !isHex(argv[4]);
 
-                if(rc) {
+                if (rc)
+                {
                     break;
                 }
 
@@ -102,28 +119,38 @@ int RSA::parse(int argc, char **argv)
                     E = mpz_class(argv[2]);
                     N = mpz_class(argv[3]);
                     M = mpz_class(argv[4]);
-                    op=ENCRYPT;
+                    op = ENCRYPT;
                     break;
                 case 'd':
                     D = mpz_class(argv[2]);
                     N = mpz_class(argv[3]);
                     C = mpz_class(argv[4]);
-                    op=DECRYPT;
+                    op = DECRYPT;
                     break;
                 default:
                     break;
                 }
 
-                if (argc <= 5) break;
+                if (argc <= 5)
+                    break;
 
-                if(strcmp(argv[5], "-l") == 0) {
+                if (strcmp(argv[5], "-l") == 0)
+                {
                     LOGGING = true;
                 }
 
                 break;
             case 'b': // Cracks
                 rc = !isHex(optarg);
-                op=CRACK;
+                
+                if(rc) 
+                {
+                    break;
+                }
+
+                N = mpz_class(optarg);
+
+                op = CRACK;
                 break;
             case 'l': // Makes logging active
                 LOGGING = true;

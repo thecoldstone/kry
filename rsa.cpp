@@ -224,7 +224,7 @@ void RSA::rsa()
 }
 
 /**
- * @brief
+ * @brief Encryptes message
  *
  */
 void RSA::encrypt()
@@ -233,7 +233,7 @@ void RSA::encrypt()
 }
 
 /**
- * @brief
+ * @brief Decrypts message
  *
  */
 void RSA::decipher()
@@ -242,11 +242,115 @@ void RSA::decipher()
 }
 
 /**
+ * @brief Does bruteforce
+ *
+ * @param n
+ * @return true
+ * @return false
+ */
+bool RSA::isBruteForced(mpz_t n)
+{
+    int isBruteForced = false;
+
+    mpz_t result;
+    mpz_init(result);
+    mpz_t divisor;
+    mpz_set_ui(divisor, 2);
+
+    for (int i = 0; !isBruteForced && i < ITERATIONS; i++)
+    {
+        mpz_mod(result, n, divisor);
+
+        if (mpz_cmp_ui(result, 0) == 0)
+        {
+            isBruteForced = true;
+        }
+
+        mpz_add_ui(divisor, divisor, 2);
+    }
+
+    return isBruteForced;
+}
+
+/**
+ * @brief Implementation of Pollard Rho Algorithm
+ * for factorization
+ * 
+ * @param n 
+ * @return true 
+ * @return false 
+ * @todo Add exceptions handling
+ */
+bool RSA::isPollardRhoed()
+{
+    if (mpz_cmp_ui(N.get_mpz_t(), 1) == 0)
+    {
+        return false;
+    }
+
+    // Check if one of the divisors is 2
+    mpz_t evenMod;  mpz_init(evenMod);
+    mpz_t divisor; mpz_init(divisor); mpz_set_ui(divisor, 2); 
+    mpz_mod(evenMod, N.get_mpz_t(), divisor);
+    if (mpz_cmp_ui(evenMod, 0) == 0)
+    {
+        return true;
+    }
+
+    mpz_t d; mpz_init(d); mpz_set_ui(d, 1);
+
+    // while(!found)
+
+    mpz_class randX = randomizer.get_z_range(N - 2) + 2;
+    mpz_class randC = randomizer.get_z_range(N - 1) + 1;
+    mpz_t x; mpz_init(x); mpz_set_ui(x, randX.get_ui());
+    mpz_t c; mpz_init(c); mpz_set_ui(c, randC.get_ui());
+
+    // while (mpz_cmp_ui(d, 1) == 0)
+    // {
+        // TODO 
+    // }
+
+    mpz_clear(evenMod);
+    mpz_clear(divisor);
+    mpz_clear(d);
+    mpz_clear(x);
+    mpz_clear(c);
+
+    return false;
+}
+
+/**
  * @brief
  *
  */
 void RSA::crack()
 {
+    if (LOGGING)
+    {
+        log("Bruteforce(ing)...", true);
+    }
+
+    if (isBruteForced(N.get_mpz_t()))
+    {
+        return;
+    }
+    else
+    {
+        if (LOGGING)
+        {
+            log("Bruteforce(ing) failed...", true);
+            log("Pollard's Rho(ing)...", true);
+        }
+
+        if (isPollardRhoed())
+        {
+        }
+        else
+        {
+            log("Pollard's Rho(ing) failed...", true);
+        };
+    }
 }
 
 /**
@@ -267,9 +371,9 @@ void RSA::run()
         {
             log("Encrypting", true);
             log("With variables:", true);
-            logVariable("E", E.get_str());
-            logVariable("N", N.get_str());
-            logVariable("M", M.get_str());
+            logGMPVariable(E, false);
+            logGMPVariable(N, false);
+            logGMPVariable(M, true);
         }
         encrypt();
         break;
@@ -278,15 +382,19 @@ void RSA::run()
         {
             log("Decrypting", true);
             log("With variables:", true);
-            logVariable("D", D.get_str());
-            logVariable("N", N.get_str());
-            logVariable("C", C.get_str());
+            logGMPVariable(D, false);
+            logGMPVariable(N, false);
+            logGMPVariable(C, true);
         }
         decipher();
         break;
     case CRACK:
         if (LOGGING)
+        {
             log("Cracking", true);
+        log("With variables:", true);
+        logGMPVariable(N, true);
+        }
         crack();
         break;
     default:
@@ -301,17 +409,17 @@ void RSA::printOutput()
     switch (op)
     {
     case GENERATE:
-        logVariable("P", P.get_str());
-        logVariable("Q", Q.get_str());
-        logVariable("N", N.get_str());
-        logVariable("E", E.get_str());
-        logVariable("D", D.get_str());
+        logGMPVariable(P, false);
+        logGMPVariable(Q, false);
+        logGMPVariable(N, false);
+        logGMPVariable(E, false);
+        logGMPVariable(D, false);
         break;
     case ENCRYPT:
-        logVariable("C", C.get_str());
+        logGMPVariable(C, false);
         break;
     case DECRYPT:
-        logVariable("D", D.get_str());
+        logGMPVariable(M, false);
         break;
     default:
         break;

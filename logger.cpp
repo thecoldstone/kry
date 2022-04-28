@@ -27,15 +27,12 @@ void Logger::log(string logText, bool newl)
 /**
  * @brief 
  * 
- * @param varName 
- * @param value 
+ * @param var 
  */
-void Logger::logVariable(string varName, string value)
+void Logger::logGMPVariable(mpz_class var, bool newl) 
 {
-    string output = varName.append(" ");
-    output = output.append("0x");
-    output = output.append(value);
-    output = output.append(" ");
+    gmp_printf("%#Zx ", var.get_mpz_t());
 
-    this->log(output, false);
+    if (newl)
+        cout << endl;
 }

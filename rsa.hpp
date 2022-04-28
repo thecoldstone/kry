@@ -13,48 +13,54 @@
 #include "logger.hpp"
 
 #define SSACCURACY 100
+#define ITERATIONS 1000000
 
-enum RSAOPERATION {
+enum RSAOPERATION
+{
     GENERATE,
     ENCRYPT,
     DECRYPT,
     CRACK
 };
 
-class RSA: public Logger {
-    public:
-        RSA();
-        int parse(int argc, char **argv);
-        void run();
-    protected:
-        void rsa();
-        void encrypt();
-        void decipher();
-        void crack();
-    private:
+class RSA : private Logger
+{
+public:
+    RSA();
+    int parse(int argc, char **argv);
+    void run();
 
-        RSAOPERATION op;
-        int B;
-        mpz_class P;
-        mpz_class Q;
-        mpz_class N;
-        mpz_class E;
-        mpz_class D;
-        mpz_class M;
-        mpz_class C;
+protected:
+    void rsa();
+    void encrypt();
+    void decipher();
+    bool isBruteForced(mpz_t);
+    bool isPollardRhoed();
+    void crack();
 
-        mpz_class Phi;
+private:
+    RSAOPERATION op;
+    int B;
+    mpz_class P;
+    mpz_class Q;
+    mpz_class N;
+    mpz_class E;
+    mpz_class D;
+    mpz_class M;
+    mpz_class C;
 
-        void printOutput();
-        bool solovoyStrassen(const mpz_class number, int k);
-        void checkPrime(mpz_class &number);
-        int jacobi(const mpz_class a, const mpz_class n);
+    mpz_class Phi;
 
-        mpz_class mod(mpz_class base, mpz_class exp, mpz_class mod);
-        mpz_class modInv(mpz_class a, mpz_class b);
-        mpz_class gcd(mpz_class a, mpz_class b);
-        mpz_class getPow(mpz_class a, mpz_class k);
-        mpz_class generatePrime();
+    void printOutput();
+    bool solovoyStrassen(const mpz_class number, int k);
+    void checkPrime(mpz_class &number);
+    int jacobi(const mpz_class a, const mpz_class n);
+
+    mpz_class mod(mpz_class base, mpz_class exp, mpz_class mod);
+    mpz_class modInv(mpz_class a, mpz_class b);
+    mpz_class gcd(mpz_class a, mpz_class b);
+    mpz_class getPow(mpz_class a, mpz_class k);
+    mpz_class generatePrime();
 };
 
 #endif

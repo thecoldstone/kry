@@ -8,6 +8,8 @@
 #ifndef _LOGGER_H
 #define _LOGGER_H
 
+#include <gmpxx.h>
+
 using namespace std;
 
 class Logger {
@@ -16,7 +18,7 @@ class Logger {
 
         Logger();
         void log(string logText, bool newl);
-        void logVariable(string varName, string value);
+        void logGMPVariable(mpz_class var, bool newl);
 };
 
 #endif
