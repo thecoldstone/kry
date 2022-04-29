@@ -279,21 +279,43 @@ bool RSA::isBruteForced(mpz_t n)
  */
 void RSA::pollardRho()
 {
-    mpz_class x = 2 + randomizer.get_z_range(N - 1);
-    mpz_class y = x;
-    mpz_class c = 1 + randomizer.get_z_range(N);
+    mpz_class x; mpz_init(x.get_mpz_t());
+    mpz_class y; mpz_init(y.get_mpz_t());
+    mpz_class c; mpz_init(c.get_mpz_t());
+    mpz_class d; mpz_init(d.get_mpz_t());
 
-    mpz_class d = 1;
+    x = randomizer.get_z_range(N - 1);
+    y = x;
+    c = randomizer.get_z_range(N);
+
+    d = 1;
+
+    logGMPVariable(x, true);
+    logGMPVariable(c, true);
 
     while(d == 1)
     {
-        x = (modPow(x, 2, N) + c + N) % N;
+        x = x * x % N;
+        x += c;
+        x += N;
+        x %= N;
 
-        y = (modPow(y, 2, N) + c + N) % N;
-        y = (modPow(y, 2, N) + c + N) % N;
+        // for (int i = 0; i < 2; i++) 
+        // {
+        y = y * y % N;
+        y += c;
+        y += N;
+        y %= N;
 
-        d = abs(x - y);
+        // y += c;
+        // y += N;
+        // y %= N;
+        // }
+
+        d = x;
+        // d = abs(d);
     }
+    P = d;
 }
 
 /**
