@@ -1,3 +1,10 @@
+/**
+ * @file parser.cpp
+ * @brief Parser implementation
+ * @author Nikita Zhukov
+ * @date 29.04.2022
+ */
+
 #include <iostream>
 #include <string>
 #include <getopt.h>
@@ -9,24 +16,37 @@ using namespace std;
 
 /**
  * @brief Help function
- *
- * @todo Fix printed help text
  */
 void help()
 {
     cout << "Example: ./kry [-g B, -e E N M, -d D N C, -b N]" << endl;
-    cout << "\tB - request key length (public modulus) in bites" << endl;
-    cout << "\t\t -b N (int)" << endl;
-    cout << "\tE - encrypts message" << endl;
-    cout << "\t\t -e E (hex) N (hex) M (hex)" << endl;
+
+    cout << "\t-g - Generates the keys" << endl;
+    cout << "\t\tB (int) - request key length of the public modulus in bites" << endl;
+
+    cout << "\t-e - Encryptes the message" << endl;
+    cout << "\t\tE (hex) - public exponent (mostly equals 3)" << endl;
+    cout << "\t\tN (hex) - public modulus" << endl;
+    cout << "\t\tM (hex) - message to encrypt (ACCEPTS ONLY INTEGER VALUES)" << endl;
+
+    cout << "\t-d - Decrypts the message" << endl;
+    cout << "\t\tD (hex) - private exponent" << endl;
+    cout << "\t\tN (hex) - public modulus" << endl;
+    cout << "\t\tC (hex) - message to decrypt (ACCEPTS ONLY INTEGER VALUES)" << endl;
+
+    cout << "\t-b - Generates the keys" << endl;
+    cout << "\t\tN (hex) - public modulus" << endl;
+
+    cout << "\t-l - Activates logging" << endl;
+    cout << "\t\t " << endl;
 }
 
 /**
  * @brief Checks if string represents a hex value
- * 
- * @param str 
- * @return true 
- * @return false 
+ *
+ * @param str
+ * @return true - it's a hex
+ * @return false - it's not a hex
  */
 bool isHex(string str)
 {
@@ -47,10 +67,10 @@ bool isHex(string str)
 
 /**
  * @brief Checks if string represents a number
- * 
- * @param str 
- * @return true 
- * @return false 
+ *
+ * @param str
+ * @return true - it's a number
+ * @return false - it's not a number
  */
 bool isNumber(string str)
 {
@@ -68,7 +88,7 @@ bool isNumber(string str)
  *
  * @param argc
  * @param argv
- * @return rc - int
+ * @return rc - int success factor 
  */
 int RSA::parse(int argc, char **argv)
 {
@@ -79,6 +99,7 @@ int RSA::parse(int argc, char **argv)
 
     if (argc <= 1)
     {
+        logError("Arguments are missing.");
         rc = EXIT_FAILURE;
     }
     else
@@ -92,6 +113,7 @@ int RSA::parse(int argc, char **argv)
             case 'g': // Generates RSA public and private keys
                 if ((rc = !isNumber(optarg)))
                 {
+                    logError("Integer value was expected.");
                     break;
                 };
                 B = stoi(optarg);
@@ -110,6 +132,7 @@ int RSA::parse(int argc, char **argv)
 
                 if (rc)
                 {
+                    logError("Values are not hex format.");
                     break;
                 }
 
@@ -142,9 +165,10 @@ int RSA::parse(int argc, char **argv)
                 break;
             case 'b': // Cracks
                 rc = !isHex(optarg);
-                
-                if(rc) 
+
+                if (rc)
                 {
+                    logError("Public modulus is not hex format.");
                     break;
                 }
 
@@ -156,7 +180,6 @@ int RSA::parse(int argc, char **argv)
                 LOGGING = true;
                 break;
             default:
-                help();
                 rc = EXIT_FAILURE;
             }
         }

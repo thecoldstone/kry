@@ -1,5 +1,4 @@
 CXX=g++
-#CXX=clang
 XLOGINXX=xzhuko01
 
 SRC=**.cpp
@@ -7,8 +6,6 @@ BIN=kry
 
 CXXFLAGS:=-Wall -Wextra -Wsuggest-override -Wnull-dereference -Wshadow -Wold-style-cast -pedantic -lgmpxx -lgmp -std=c++20
 
-# all: 
-# 	$(CXX) $(SRC) -o $(BIN)
 
 LINK.o = $(LINK.cpp)
 

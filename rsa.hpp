@@ -2,7 +2,7 @@
  * @file rsa.hpp
  * @brief RSA header
  * @author Nikita Zhukov
- * @date 09.04.2022
+ * @date 29.04.2022
  */
 
 #ifndef _RSA_H
@@ -34,7 +34,7 @@ protected:
     void rsa();
     void encrypt();
     void decipher();
-    bool bruteForce();
+    void bruteForce();
     void pollardRho();
     void crack();
 
@@ -52,14 +52,13 @@ private:
     mpz_class Phi;
 
     void printOutput();
-    bool solovoyStrassen(const mpz_class number, int k);
+    bool solovayStrassen(const mpz_class number, int k);
     void checkPrime(mpz_class &number);
     int jacobi(const mpz_class a, const mpz_class n);
 
     mpz_class modPow(mpz_class base, mpz_class exp, mpz_class mod);
     mpz_class modInv(mpz_class a, mpz_class b);
     mpz_class gcd(mpz_class a, mpz_class b);
-    mpz_class getPow(mpz_class a, mpz_class k);
     mpz_class generatePrime();
 };
 

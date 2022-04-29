@@ -1,8 +1,8 @@
 /**
- * @file logginh.hpp
+ * @file logger.hpp
  * @brief Logger header
  * @author Nikita Zhukov
- * @date 15.04.2022
+ * @date 29.04.2022
  */
 
 #ifndef _LOGGER_H
@@ -19,6 +19,7 @@ class Logger {
         Logger();
         void log(string logText, bool newl);
         void logGMPVariable(mpz_class var, bool newl);
+        void logError(string errText);
 };
 
 #endif

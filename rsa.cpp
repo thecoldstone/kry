@@ -1,3 +1,10 @@
+/**
+ * @file rsa.cpp
+ * @brief RSA Implementation
+ * @author Nikita Zhukov
+ * @date 29.04.2022
+ */
+
 #include <iostream>
 #include <cstddef>
 #include <stddef.h>
@@ -19,7 +26,7 @@ RSA::RSA()
 }
 
 /**
- * @brief Function to calculate (base^exponent) % mod
+ * @brief Computes (base^exponent) % mod
  *
  * @param base
  * @param exp
@@ -43,6 +50,13 @@ mpz_class RSA::modPow(mpz_class base, mpz_class exp, mpz_class mod)
     return x % mod;
 }
 
+/**
+ * @brief Computes modular multiplicative inverse
+ *
+ * @param a computation item
+ * @param m modulo
+ * @return mpz_class - multiplicative inverse
+ */
 mpz_class RSA::modInv(mpz_class a, mpz_class m)
 {
     mpz_class m0 = m;
@@ -69,6 +83,13 @@ mpz_class RSA::modInv(mpz_class a, mpz_class m)
     return x;
 }
 
+/**
+ * @brief Computes a Jacobi symbol (a/n)
+ *
+ * @param a jacobi argument presented as the "numerator"
+ * @param b jacobi argument presented as the "denominator"
+ * @return int - jacobi symbol
+ */
 int RSA::jacobi(mpz_class a, mpz_class b)
 {
     if (a == 0)
@@ -110,11 +131,11 @@ int RSA::jacobi(mpz_class a, mpz_class b)
 }
 
 /**
- * @brief Counts Greate Common Divisor (GCD)
+ * @brief Computes Greate Common Divisor (GCD) in the recursive manner
  *
- * @param a
- * @param b
- * @return mpz_class
+ * @param a argument
+ * @param b argument
+ * @return mpz_class - greate common divisor
  */
 mpz_class RSA::gcd(mpz_class a, mpz_class b)
 {
@@ -122,30 +143,13 @@ mpz_class RSA::gcd(mpz_class a, mpz_class b)
 }
 
 /**
- * @brief
+ * @brief Implementation of Solovay-Strassen Primarly test algorithm
  *
- * @param a
- * @param k
- * @return mpz_class
+ * @param n primary number to check
+ * @param k number of repetitions of the test
+ * @return bool - is it a primary number
  */
-mpz_class RSA::getPow(mpz_class a, mpz_class number)
-{
-    mpz_class result;
-    mpz_class exp = (number - 1) / 2;
-
-    mpz_powm(result.get_mpz_t(), a.get_mpz_t(), exp.get_mpz_t(), number.get_mpz_t());
-
-    return result;
-}
-
-/**
- * @brief
- *
- * @param n
- * @param k
- * @return bool
- */
-bool RSA::solovoyStrassen(const mpz_class n, int k)
+bool RSA::solovayStrassen(const mpz_class n, int k)
 {
     if (n == 2 || n == 3)
         return true;
@@ -173,22 +177,23 @@ bool RSA::solovoyStrassen(const mpz_class n, int k)
 };
 
 /**
- * @brief
+ * @brief Does the Solovay-Strassen test
  *
- * @param number
+ * @param number number to check
  */
 void RSA::checkPrime(mpz_class &number)
 {
-    while (!solovoyStrassen(number, SSACCURACY))
+    while (!solovayStrassen(number, SSACCURACY))
     {
         number++ ++;
     }
 };
 
 /**
- * @brief
+ * @brief Generates prime number
  *
- * @return mpz_class
+ * @return mpz_class - prime number within specific range
+ * based on passed B value
  */
 mpz_class RSA::generatePrime()
 {
@@ -196,9 +201,7 @@ mpz_class RSA::generatePrime()
 }
 
 /**
- * @brief
- *
- * @return int
+ * @brief Runs RSA algorithm
  */
 void RSA::rsa()
 {
@@ -226,7 +229,6 @@ void RSA::rsa()
 
 /**
  * @brief Encryptes message
- *
  */
 void RSA::encrypt()
 {
@@ -235,7 +237,6 @@ void RSA::encrypt()
 
 /**
  * @brief Decrypts message
- *
  */
 void RSA::decipher()
 {
@@ -244,49 +245,38 @@ void RSA::decipher()
 
 /**
  * @brief Brute force alogirthm to factorize
- * 
- * @return true 
- * @return false 
  */
-bool RSA::bruteForce()
+void RSA::bruteForce()
 {
-    int isBruteForced = false;
+    unsigned int divisor = 2;
 
-    // mpz_t result;
-    // mpz_init(result);
-    // mpz_t divisor;
-    // mpz_set_ui(divisor, 2);
+    for (int i = 0; i < ITERATIONS; i++)
+    {
+        if (N % divisor == 0)
+        {
+            P = divisor;
+            return;
+        }
 
-    // for (int i = 0; !isBruteForced && i < ITERATIONS; i++)
-    // {
-    //     mpz_mod(result, n, divisor);
-
-    //     if (mpz_cmp_ui(result, 0) == 0)
-    //     {
-    //         isBruteForced = true;
-    //     }
-
-    //     mpz_add_ui(divisor, divisor, 2);
-    // }
-
-    // return isBruteForced;
-    return isBruteForced;
+        divisor += 2;
+    }
 }
 
 /**
- * @brief 
- * 
+ * @brief Implementation of Pollard Rho Algorithm to factorize big number
  */
 void RSA::pollardRho()
 {
     if (N == 1)
     {
         P = N;
+        return;
     }
 
     if (N % 2 == 0)
     {
         P = 2;
+        return;
     }
 
     mpz_class x;
@@ -328,35 +318,46 @@ void RSA::pollardRho()
 }
 
 /**
- * @brief
- *
+ * @brief Runs breaking methods to crack public modulus.
+ * Bruteforce method and Pollards Rho.
  */
 void RSA::crack()
 {
+    mpz_class _p = P;
     if (LOGGING)
     {
         log("Bruteforce(ing)...", true);
     }
+    bruteForce();
 
-    if(bruteForce()) 
+    if (P != _p)
     {
-        if (LOGGING) 
+        if (LOGGING)
         {
-            log("Factorization has been brute forced!", true);
+            log("Bruteforce cracked prime number!", true);
+            logGMPVariable(P, true);
         }
+        return;
     }
 
     if (LOGGING)
     {
-        log("Bruteforce(ing) failed...", true);
         log("Pollard's Rho(ing)...", true);
     }
     pollardRho();
+
+    if (P != _p)
+    {
+        if (LOGGING)
+        {
+            log("Pollard's Rho algorithm cracked prime number!", true);
+            logGMPVariable(P, true);
+        }
+    }
 }
 
 /**
- * @brief
- *
+ * @brief Runs the RSA programme based on passed arguments from stdin.
  */
 void RSA::run()
 {
@@ -406,6 +407,9 @@ void RSA::run()
     printOutput();
 }
 
+/**
+ * @brief Prints out results of RSA.
+ */
 void RSA::printOutput()
 {
     switch (op)

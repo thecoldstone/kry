@@ -1,3 +1,10 @@
+/**
+ * @file main.cpp
+ * @brief Main file
+ * @author Nikita Zhukov
+ * @date 29.04.2022
+ */
+
 #include <iostream>
 #include "rsa.hpp"
 
