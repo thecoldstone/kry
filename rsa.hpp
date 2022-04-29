@@ -35,7 +35,7 @@ protected:
     void encrypt();
     void decipher();
     bool isBruteForced(mpz_t);
-    bool isPollardRhoed();
+    void pollardRho();
     void crack();
 
 private:
@@ -56,7 +56,7 @@ private:
     void checkPrime(mpz_class &number);
     int jacobi(const mpz_class a, const mpz_class n);
 
-    mpz_class mod(mpz_class base, mpz_class exp, mpz_class mod);
+    mpz_class modPow(mpz_class base, mpz_class exp, mpz_class mod);
     mpz_class modInv(mpz_class a, mpz_class b);
     mpz_class gcd(mpz_class a, mpz_class b);
     mpz_class getPow(mpz_class a, mpz_class k);

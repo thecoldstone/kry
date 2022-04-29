@@ -1,11 +1,12 @@
 #include <iostream>
 #include <cstddef>
 #include <stddef.h>
+#include <stdio.h>
 #include "rsa.hpp"
 
 using namespace std;
 
-unsigned long int seed = time(NULL);
+unsigned long seed = time(NULL);
 gmp_randclass randomizer = gmp_randclass(gmp_randinit_mt);
 
 /**
@@ -18,14 +19,14 @@ RSA::RSA()
 }
 
 /**
- * @brief Modulo operation
+ * @brief Function to calculate (base^exponent) % modulus
  *
  * @param base
  * @param exp
  * @param mod
  * @return mpz_class
  */
-mpz_class RSA::mod(mpz_class base, mpz_class exp, mpz_class mod)
+mpz_class RSA::modPow(mpz_class base, mpz_class exp, mpz_class mod)
 {
     mpz_class x = 1;
     mpz_class y = base;
@@ -36,7 +37,7 @@ mpz_class RSA::mod(mpz_class base, mpz_class exp, mpz_class mod)
             x = (x * y) % mod;
 
         y = (y * y) % mod;
-        exp = exp / 2;
+        exp = exp >> 1;
     }
 
     return x % mod;
@@ -162,7 +163,7 @@ bool RSA::solovoyStrassen(const mpz_class n, int k)
 
         mpz_class jacobian = (n + jacobi(a, n)) % n;
 
-        if (jacobian == 0 || jacobian != mod(a, (n - 1) / 2, n))
+        if (jacobian == 0 || jacobian != modPow(a, (n - 1) / 2, n))
         {
             return false;
         }
@@ -229,7 +230,7 @@ void RSA::rsa()
  */
 void RSA::encrypt()
 {
-    C = mod(M, E, N);
+    C = modPow(M, E, N);
 }
 
 /**
@@ -238,7 +239,7 @@ void RSA::encrypt()
  */
 void RSA::decipher()
 {
-    M = mod(C, D, N);
+    M = modPow(C, D, N);
 }
 
 /**
@@ -273,51 +274,26 @@ bool RSA::isBruteForced(mpz_t n)
 }
 
 /**
- * @brief Implementation of Pollard Rho Algorithm
- * for factorization
+ * @brief 
  * 
- * @param n 
- * @return true 
- * @return false 
- * @todo Add exceptions handling
  */
-bool RSA::isPollardRhoed()
+void RSA::pollardRho()
 {
-    if (mpz_cmp_ui(N.get_mpz_t(), 1) == 0)
+    mpz_class x = 2 + randomizer.get_z_range(N - 1);
+    mpz_class y = x;
+    mpz_class c = 1 + randomizer.get_z_range(N);
+
+    mpz_class d = 1;
+
+    while(d == 1)
     {
-        return false;
+        x = (modPow(x, 2, N) + c + N) % N;
+
+        y = (modPow(y, 2, N) + c + N) % N;
+        y = (modPow(y, 2, N) + c + N) % N;
+
+        d = abs(x - y);
     }
-
-    // Check if one of the divisors is 2
-    mpz_t evenMod;  mpz_init(evenMod);
-    mpz_t divisor; mpz_init(divisor); mpz_set_ui(divisor, 2); 
-    mpz_mod(evenMod, N.get_mpz_t(), divisor);
-    if (mpz_cmp_ui(evenMod, 0) == 0)
-    {
-        return true;
-    }
-
-    mpz_t d; mpz_init(d); mpz_set_ui(d, 1);
-
-    // while(!found)
-
-    mpz_class randX = randomizer.get_z_range(N - 2) + 2;
-    mpz_class randC = randomizer.get_z_range(N - 1) + 1;
-    mpz_t x; mpz_init(x); mpz_set_ui(x, randX.get_ui());
-    mpz_t c; mpz_init(c); mpz_set_ui(c, randC.get_ui());
-
-    // while (mpz_cmp_ui(d, 1) == 0)
-    // {
-        // TODO 
-    // }
-
-    mpz_clear(evenMod);
-    mpz_clear(divisor);
-    mpz_clear(d);
-    mpz_clear(x);
-    mpz_clear(c);
-
-    return false;
 }
 
 /**
@@ -342,14 +318,7 @@ void RSA::crack()
             log("Bruteforce(ing) failed...", true);
             log("Pollard's Rho(ing)...", true);
         }
-
-        if (isPollardRhoed())
-        {
-        }
-        else
-        {
-            log("Pollard's Rho(ing) failed...", true);
-        };
+        pollardRho();
     }
 }
 
@@ -392,8 +361,8 @@ void RSA::run()
         if (LOGGING)
         {
             log("Cracking", true);
-        log("With variables:", true);
-        logGMPVariable(N, true);
+            log("With variables:", true);
+            logGMPVariable(N, true);
         }
         crack();
         break;
@@ -420,6 +389,9 @@ void RSA::printOutput()
         break;
     case DECRYPT:
         logGMPVariable(M, false);
+        break;
+    case CRACK:
+        logGMPVariable(P, false);
         break;
     default:
         break;
