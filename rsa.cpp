@@ -19,7 +19,7 @@ RSA::RSA()
 }
 
 /**
- * @brief Function to calculate (base^exponent) % modulus
+ * @brief Function to calculate (base^exponent) % mod
  *
  * @param base
  * @param exp
@@ -242,80 +242,86 @@ void RSA::decipher()
     M = modPow(C, D, N);
 }
 
-/**
- * @brief Does bruteforce
- *
- * @param n
- * @return true
- * @return false
- */
-bool RSA::isBruteForced(mpz_t n)
+mpz_class RSA::bruteForce()
 {
     int isBruteForced = false;
+    mpz_class p;
 
-    mpz_t result;
-    mpz_init(result);
-    mpz_t divisor;
-    mpz_set_ui(divisor, 2);
+    // mpz_t result;
+    // mpz_init(result);
+    // mpz_t divisor;
+    // mpz_set_ui(divisor, 2);
 
-    for (int i = 0; !isBruteForced && i < ITERATIONS; i++)
-    {
-        mpz_mod(result, n, divisor);
+    // for (int i = 0; !isBruteForced && i < ITERATIONS; i++)
+    // {
+    //     mpz_mod(result, n, divisor);
 
-        if (mpz_cmp_ui(result, 0) == 0)
-        {
-            isBruteForced = true;
-        }
+    //     if (mpz_cmp_ui(result, 0) == 0)
+    //     {
+    //         isBruteForced = true;
+    //     }
 
-        mpz_add_ui(divisor, divisor, 2);
-    }
+    //     mpz_add_ui(divisor, divisor, 2);
+    // }
 
-    return isBruteForced;
+    // return isBruteForced;
+    return p;
 }
 
 /**
  * @brief 
  * 
+ * @return true 
+ * @return false 
  */
-void RSA::pollardRho()
+bool RSA::isPollardRho()
 {
-    mpz_class x; mpz_init(x.get_mpz_t());
-    mpz_class y; mpz_init(y.get_mpz_t());
-    mpz_class c; mpz_init(c.get_mpz_t());
-    mpz_class d; mpz_init(d.get_mpz_t());
-
-    x = randomizer.get_z_range(N - 1);
-    y = x;
-    c = randomizer.get_z_range(N);
-
-    d = 1;
-
-    logGMPVariable(x, true);
-    logGMPVariable(c, true);
-
-    while(d == 1)
+    if (N == 1)
     {
-        x = x * x % N;
-        x += c;
-        x += N;
-        x %= N;
-
-        // for (int i = 0; i < 2; i++) 
-        // {
-        y = y * y % N;
-        y += c;
-        y += N;
-        y %= N;
-
-        // y += c;
-        // y += N;
-        // y %= N;
-        // }
-
-        d = x;
-        // d = abs(d);
+        P = N;
     }
-    P = d;
+
+    if (N % 2 == 0)
+    {
+        P = 2;
+    }
+
+    mpz_class x;
+    mpz_class y;
+    mpz_class c;
+    mpz_class d;
+
+    while (true)
+    {
+        randomizer.seed(seed);
+        x = 2 + randomizer.get_z_range(N - 1);
+        y = x;
+        c = 1 + randomizer.get_z_range(N);
+        d = 1;
+
+        while (d == 1)
+        {
+            // Tortoise move: x(i + 1) = f(x(i))
+            x = (modPow(x, 2, N) + c + N) % N;
+
+            // Hare move: y(i + 1) = f(f(y(i)))
+            y = (modPow(y, 2, N) + c + N) % N;
+            y = (modPow(y, 2, N) + c + N) % N;
+
+            // gcd |x-y| <> n
+            d = gcd(abs(x - y), N);
+            if (d == N)
+            {
+                break;
+            }
+        }
+
+        // Check if d is our desired divisor
+        if (d != N)
+        {
+            P = d;
+        }
+    }
 }
 
 /**
@@ -329,18 +335,16 @@ void RSA::crack()
         log("Bruteforce(ing)...", true);
     }
 
-    if (isBruteForced(N.get_mpz_t()))
+    // P = bruteForce();
+    // P =
+
+    if (LOGGING)
     {
-        return;
+        log("Bruteforce(ing) failed...", true);
+        log("Pollard's Rho(ing)...", true);
     }
-    else
+    if (isPollardRho())
     {
-        if (LOGGING)
-        {
-            log("Bruteforce(ing) failed...", true);
-            log("Pollard's Rho(ing)...", true);
-        }
-        pollardRho();
     }
 }
 
