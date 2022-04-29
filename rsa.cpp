@@ -242,10 +242,15 @@ void RSA::decipher()
     M = modPow(C, D, N);
 }
 
-mpz_class RSA::bruteForce()
+/**
+ * @brief Brute force alogirthm to factorize
+ * 
+ * @return true 
+ * @return false 
+ */
+bool RSA::bruteForce()
 {
     int isBruteForced = false;
-    mpz_class p;
 
     // mpz_t result;
     // mpz_init(result);
@@ -265,16 +270,14 @@ mpz_class RSA::bruteForce()
     // }
 
     // return isBruteForced;
-    return p;
+    return isBruteForced;
 }
 
 /**
  * @brief 
  * 
- * @return true 
- * @return false 
  */
-bool RSA::isPollardRho()
+void RSA::pollardRho()
 {
     if (N == 1)
     {
@@ -293,7 +296,6 @@ bool RSA::isPollardRho()
 
     while (true)
     {
-        randomizer.seed(seed);
         x = 2 + randomizer.get_z_range(N - 1);
         y = x;
         c = 1 + randomizer.get_z_range(N);
@@ -320,6 +322,7 @@ bool RSA::isPollardRho()
         if (d != N)
         {
             P = d;
+            return;
         }
     }
 }
@@ -335,17 +338,20 @@ void RSA::crack()
         log("Bruteforce(ing)...", true);
     }
 
-    // P = bruteForce();
-    // P =
+    if(bruteForce()) 
+    {
+        if (LOGGING) 
+        {
+            log("Factorization has been brute forced!", true);
+        }
+    }
 
     if (LOGGING)
     {
         log("Bruteforce(ing) failed...", true);
         log("Pollard's Rho(ing)...", true);
     }
-    if (isPollardRho())
-    {
-    }
+    pollardRho();
 }
 
 /**
@@ -384,6 +390,7 @@ void RSA::run()
         decipher();
         break;
     case CRACK:
+        randomizer.seed(seed);
         if (LOGGING)
         {
             log("Cracking", true);

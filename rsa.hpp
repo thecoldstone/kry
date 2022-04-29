@@ -34,8 +34,8 @@ protected:
     void rsa();
     void encrypt();
     void decipher();
-    mpz_class bruteForce();
-    bool isPollardRho();
+    bool bruteForce();
+    void pollardRho();
     void crack();
 
 private:
