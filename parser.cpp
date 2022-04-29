@@ -97,7 +97,7 @@ int RSA::parse(int argc, char **argv)
     int opt;
     static const char *sOptions = "g:e:d:b:l";
 
-    if (argc <= 1)
+    if (argc <= 1 || argv[1][0] != '-')
     {
         logError("Arguments are missing.");
         rc = EXIT_FAILURE;
@@ -181,6 +181,7 @@ int RSA::parse(int argc, char **argv)
                 break;
             default:
                 rc = EXIT_FAILURE;
+                break;
             }
         }
     }
